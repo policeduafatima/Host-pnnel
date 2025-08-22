@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployments - Fatima Nodes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* [Previous CSS content remains exactly the same] */
+      :root {
+            --primary: #1a237e;
+            --primary-light: #534bae;
+            --secondary: #00bcd4;
+            --accent: #ff4081;
+            --text: #ffffff;
+            --text-secondary: #b0bec5;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --error: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .deployments-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #00acc1;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .deployments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .deployment-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .deployment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .deployment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .deployment-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .deployment-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+        }
+        
+        .status-suspended {
+            background: rgba(244, 67, 54, 0.2);
+            color: var(--error);
+        }
+        
+        .deployment-details {
+            margin-bottom: 15px;
+        }
+        
+        .deployment-details p {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .deployment-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        
+        .btn-danger {
+            background: rgba(244, 67, 54, 0.2);
+            color: var(--error);
+        }
+        
+        .btn-danger:hover {
+            background: rgba(244, 67, 54, 0.3);
+        }
+        
+        .deploy-form {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: var(--text);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .toggle-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--secondary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        @media (max-width: 768px) {
+            .deployments-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        
+        
+        /* Additional styles for deployment form */
+        .deploy-form {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: var(--text);
+        }
+        
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .cost-indicator {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .cost-indicator i {
+            color: gold;
+        }
+        
+        .toggle-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--secondary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--text);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Error message */
+        .error-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--error);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="deployments-container">
+        <div class="mobile-header">
+            <button class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="page-title"><i class="fas fa-server"></i> Deployments</h1>
+        </div>
+        
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="https://i.postimg.cc/zv76KffW/IMG-20250115-WA0020.jpg" alt="Logo" class="logo">
+                <h2>Fatima Nodes</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="active"><a href="/deployments"><i class="fas fa-server"></i> Deployments</a></li>
+                    <li><a href="/wallet"><i class="fas fa-wallet"></i> Wallet</a></li>
+                    <li><a href="/referrals"><i class="fas fa-user-plus"></i> Referrals</a></li>
+                    <li><a href="/messages"><i class="fas fa-envelope"></i> Messages</a></li>
+                    <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li><a href="/logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title"><i class="fas fa-server"></i> Deployments</h1>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-primary" id="new-deployment-btn">
+                        <i class="fas fa-plus"></i> New Deployment
+                    </button>
+                </div>
+            </div>
+            
+            <div class="deploy-form" id="deploy-form">
+                <h2><i class="fas fa-rocket"></i> Deploy New Bot</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="app-name">App Name</label>
+                        <input type="text" id="app-name" placeholder="fatima-md-123" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="session-id">SESSION_ID</label>
+                        <input type="text" id="session-id" placeholder="Your WhatsApp session ID" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prefix">PREFIX</label>
+                        <input type="text" id="prefix" placeholder="." value=".">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bot-name">BOT_NAME</label>
+                        <input type="text" id="bot-name" placeholder="FATIMA-MD" value="FATIMA-MD">
+                    </div>
+                </div>
+                
+                <div class="toggle-group">
+                    <label>ALWAYS_ONLINE</label>
+                    <label class="switch">
+                        <input type="checkbox" id="always-online" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-group">
+                    <label>AUTO_REPLY</label>
+                    <label class="switch">
+                        <input type="checkbox" id="auto-reply" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="form-footer">
+                    <div class="cost-indicator">
+                        <i class="fas fa-coins"></i> Deployment Cost: 10 coins
+                    </div>
+                    <button class="btn btn-primary" id="deploy-btn">
+                        <i class="fas fa-rocket"></i> Deploy Now
+                    </button>
+                </div>
+            </div>
+            
+            <div class="deployments-grid" id="deployments-grid">
+                <div class="empty-state">
+                    <i class="fas fa-server"></i>
+                    <p>Loading deployments...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
+
+            // DOM elements
+            const deployForm = document.getElementById('deploy-form');
+            const deploymentsGrid = document.getElementById('deployments-grid');
+            const refreshBtn = document.getElementById('refresh-btn');
+            const newDeploymentBtn = document.getElementById('new-deployment-btn');
+            const deployBtn = document.getElementById('deploy-btn');
+
+            // Toggle deploy form visibility
+            newDeploymentBtn.addEventListener('click', () => {
+                deployForm.style.display = deployForm.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Load user data to check coin balance
+            async function loadUserData() {
+                try {
+                    const response = await fetch('/api/auth/user', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to fetch user data');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    showError('Failed to load user data');
+                    return null;
+                }
+            }
+
+            // Load deployments data
+            async function loadDeployments() {
+                try {
+                    deploymentsGrid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading deployments...</p>
+                        </div>
+                    `;
+                    
+                    const response = await fetch('/api/deployments', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to fetch deployments');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error loading deployments:', error);
+                    showError('Failed to load deployments');
+                    return [];
+                }
+            }
+
+            // Deploy new bot
+            deployBtn.addEventListener('click', async () => {
+                const appName = document.getElementById('app-name').value.trim();
+                const sessionId = document.getElementById('session-id').value.trim();
+                
+                if (!appName || !sessionId) {
+                    showError('App name and session ID are required');
+                    return;
+                }
+
+                // Check user's coin balance
+                const user = await loadUserData();
+                if (!user) return;
+                
+                if (user.coins < 10) {
+                    showError('You need at least 10 coins to deploy a bot');
+                    return;
+                }
+
+                const config = {
+                    prefix: document.getElementById('prefix').value,
+                    botName: document.getElementById('bot-name').value,
+                    alwaysOnline: document.getElementById('always-online').checked,
+                    autoReply: document.getElementById('auto-reply').checked
+                };
+
+                try {
+                    deployBtn.disabled = true;
+                    deployBtn.innerHTML = '<span class="spinner"></span> Deploying...';
+
+                    const response = await fetch('/api/deployments', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ appName, sessionId, config })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (!response.ok) throw new Error(data.error || 'Deployment failed');
+                    
+                    showSuccess('Deployment started successfully!');
+                    await updateDeploymentsGrid();
+                    deployForm.style.display = 'none';
+                } catch (error) {
+                    console.error('Deployment error:', error);
+                    showError(error.message);
+                } finally {
+                    deployBtn.disabled = false;
+                    deployBtn.innerHTML = '<i class="fas fa-rocket"></i> Deploy Now';
+                }
+            });
+
+            // Update deployments grid
+            async function updateDeploymentsGrid() {
+                const deployments = await loadDeployments();
+                deploymentsGrid.innerHTML = '';
+
+                if (deployments.length === 0) {
+                    deploymentsGrid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-server"></i>
+                            <p>No deployments yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                deployments.forEach(deployment => {
+                    const deploymentEl = document.createElement('div');
+                    deploymentEl.className = 'deployment-card';
+                    
+                    // Format date
+                    const createdAt = new Date(deployment.createdAt).toLocaleDateString();
+                    
+                    // Status badge
+                    let statusBadge = '';
+                    if (deployment.status === 'active') {
+                        statusBadge = '<span class="deployment-status status-active">Active</span>';
+                    } else if (deployment.status === 'suspended') {
+                        statusBadge = '<span class="deployment-status status-suspended">Suspended</span>';
+                    }
+
+                    deploymentEl.innerHTML = `
+                        <div class="deployment-header">
+                            <h3 class="deployment-name">${deployment.appName}</h3>
+                            ${statusBadge}
+                        </div>
+                        <div class="deployment-details">
+                            <p><i class="fas fa-link"></i> ${deployment.url}</p>
+                            <p><i class="fas fa-calendar"></i> Created: ${createdAt}</p>
+                            ${deployment.status === 'suspended' ? 
+                                '<p><i class="fas fa-exclamation-triangle"></i> Payment overdue</p>' : 
+                                `<p><i class="fas fa-clock"></i> Next payment: 24 hours</p>`}
+                        </div>
+                        <div class="deployment-actions">
+                            <button class="btn btn-secondary btn-sm view-logs-btn" data-id="${deployment._id}">
+                                <i class="fas fa-terminal"></i> Logs
+                            </button>
+                            ${deployment.status === 'suspended' ? 
+                                `<button class="btn btn-primary btn-sm pay-btn" data-id="${deployment._id}">
+                                    <i class="fas fa-coins"></i> Pay 10 coins
+                                </button>` : 
+                                `<button class="btn btn-secondary btn-sm config-btn" data-id="${deployment._id}">
+                                    <i class="fas fa-cog"></i> Config
+                                </button>`}
+                            <button class="btn btn-danger btn-sm delete-btn" data-id="${deployment._id}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `;
+                    
+                    deploymentsGrid.appendChild(deploymentEl);
+                });
+
+                // Add event listeners to dynamically created buttons
+                document.querySelectorAll('.view-logs-btn').forEach(btn => {
+                    btn.addEventListener('click', () => viewLogs(btn.dataset.id));
+                });
+                
+                document.querySelectorAll('.pay-btn').forEach(btn => {
+                    btn.addEventListener('click', () => payForDeployment(btn.dataset.id));
+                });
+                
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteDeployment(btn.dataset.id));
+                });
+            }
+
+            // View logs function
+            async function viewLogs(deploymentId) {
+                try {
+                    const response = await fetch(`/api/deployments/${deploymentId}/logs`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to fetch logs');
+                    const logs = await response.json();
+                    
+                    // Show logs in a modal or new page
+                    alert(`Latest logs:\n\n${logs.slice(0, 5).map(log => log.message).join('\n')}`);
+                } catch (error) {
+                    console.error('Error viewing logs:', error);
+                    showError('Failed to load logs');
+                }
+            }
+
+            // Pay for suspended deployment
+            async function payForDeployment(deploymentId) {
+                if (!confirm('Pay 10 coins to reactivate this bot?')) return;
+                
+                try {
+                    const response = await fetch(`/api/deployments/${deploymentId}/pay`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to process payment');
+                    
+                    showSuccess('Payment successful! Bot will be reactivated shortly.');
+                    await updateDeploymentsGrid();
+                } catch (error) {
+                    console.error('Payment error:', error);
+                    showError(error.message);
+                }
+            }
+
+            // Delete deployment
+            async function deleteDeployment(deploymentId) {
+                if (!confirm('Are you sure you want to delete this deployment?')) return;
+                
+                try {
+                    const response = await fetch(`/api/deployments/${deploymentId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to delete deployment');
+                    
+                    showSuccess('Deployment deleted successfully!');
+                    await updateDeploymentsGrid();
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    showError(error.message);
+                }
+            }
+
+            // Show error message
+            function showError(message) {
+                const errorEl = document.createElement('div');
+                errorEl.className = 'error-message';
+                errorEl.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i> ${message}
+                `;
+                document.body.appendChild(errorEl);
+                setTimeout(() => errorEl.remove(), 5000);
+            }
+
+            // Show success message
+            function showSuccess(message) {
+                const successEl = document.createElement('div');
+                successEl.className = 'error-message';
+                successEl.style.background = 'var(--success)';
+                successEl.innerHTML = `
+                    <i class="fas fa-check-circle"></i> ${message}
+                `;
+                document.body.appendChild(successEl);
+                setTimeout(() => successEl.remove(), 5000);
+            }
+
+            // Initialize
+            await updateDeploymentsGrid();
+            refreshBtn.addEventListener('click', updateDeploymentsGrid);
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    !sidebar.contains(e.target) && 
+                    e.target !== menuToggle) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
