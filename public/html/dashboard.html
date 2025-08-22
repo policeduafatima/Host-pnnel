@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Fatima Nodes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a237e;
+            --primary-light: #534bae;
+            --secondary: #00bcd4;
+            --accent: #ff4081;
+            --text: #ffffff;
+            --text-secondary: #b0bec5;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --error: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+        
+        .sidebar {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .sidebar-nav ul {
+            list-style: none;
+        }
+        
+        .sidebar-nav li {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-nav li:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-nav li.active {
+            background: var(--primary-light);
+        }
+        
+        .sidebar-nav i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .mobile-header {
+            display: none;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .stat-card p {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .deploy-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .deploy-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .deploy-btn:hover {
+            background: #00acc1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.3);
+        }
+        
+        .recent-deployments {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .deployment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .deployment-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .deployment-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+        }
+        
+        .status-suspended {
+            background: rgba(244, 67, 54, 0.2);
+            color: var(--error);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                bottom: 0;
+                z-index: 1000;
+                width: 250px;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .mobile-header {
+                display: flex;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="https://i.postimg.cc/zv76KffW/IMG-20250115-WA0020.jpg" alt="Logo" class="logo">
+                <h2>Fatima Nodes</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active"><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="/deployments"><i class="fas fa-server"></i> Deployments</a></li>
+                    <li><a href="/wallet"><i class="fas fa-wallet"></i> Wallet</a></li>
+                    <li><a href="/referrals"><i class="fas fa-user-plus"></i> Referrals</a></li>
+                    <li><a href="/messages"><i class="fas fa-envelope"></i> Messages</a></li>
+                    <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li><a href="/logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <div class="mobile-header">
+                <button class="menu-toggle" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title"><i class="fas fa-home"></i> Dashboard</h1>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Bots</h3>
+                    <p id="total-bots">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Bots</h3>
+                    <p id="active-bots">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Suspended Bots</h3>
+                    <p id="suspended-bots">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Your Coins</h3>
+                    <p id="your-coins">0</p>
+                </div>
+            </div>
+            
+            <div class="deploy-section">
+                <h2><i class="fas fa-rocket"></i> Quick Deploy</h2>
+                <button class="deploy-btn" id="deploy-new-btn">
+                    <i class="fas fa-plus"></i> Deploy New Bot
+                </button>
+            </div>
+            
+            <div class="recent-deployments">
+                <h2><i class="fas fa-history"></i> Recent Deployments</h2>
+                <div id="deployments-list">
+                    <div class="empty-state">
+                        <i class="fas fa-server"></i>
+                        <p>No deployments yet</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
+
+            // Load user data
+            async function loadUserData() {
+                try {
+                    const response = await fetch('/api/auth/user', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to fetch user data');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                    return null;
+                }
+            }
+
+            // Load deployments data
+            async function loadDeployments() {
+                try {
+                    const response = await fetch('/api/deployments', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to fetch deployments');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error loading deployments:', error);
+                    showError('Failed to load deployments');
+                    return [];
+                }
+            }
+
+            // Update UI with loaded data
+            async function updateUI() {
+                const user = await loadUserData();
+                if (!user) return;
+
+                // Update user info
+                document.querySelector('.sidebar-header h2').textContent = user.username;
+                document.getElementById('your-coins').textContent = user.coins;
+
+                // Update deployments
+                const deployments = await loadDeployments();
+                const totalBots = deployments.length;
+                const activeBots = deployments.filter(d => d.status === 'active').length;
+                const suspendedBots = deployments.filter(d => d.status === 'suspended').length;
+
+                document.getElementById('total-bots').textContent = totalBots;
+                document.getElementById('active-bots').textContent = activeBots;
+                document.getElementById('suspended-bots').textContent = suspendedBots;
+
+                // Update recent deployments list
+                const deploymentsList = document.getElementById('deployments-list');
+                deploymentsList.innerHTML = '';
+
+                if (deployments.length === 0) {
+                    deploymentsList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-server"></i>
+                            <p>No deployments yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const recentDeployments = deployments.slice(0, 3); // Show last 3
+                recentDeployments.forEach(deployment => {
+                    const deploymentEl = document.createElement('div');
+                    deploymentEl.className = 'deployment-item';
+                    
+                    const statusClass = deployment.status === 'active' ? 'status-active' : 'status-suspended';
+                    const statusText = deployment.status.charAt(0).toUpperCase() + deployment.status.slice(1);
+                    
+                    deploymentEl.innerHTML = `
+                        <div class="deployment-info">
+                            <h3>${deployment.appName}</h3>
+                            <p>${deployment.url}</p>
+                        </div>
+                        <span class="deployment-status ${statusClass}">${statusText}</span>
+                    `;
+                    
+                    deploymentEl.addEventListener('click', () => {
+                        window.location.href = `/deployments`;
+                    });
+                    
+                    deploymentsList.appendChild(deploymentEl);
+                });
+            }
+
+            // Initialize
+            await updateUI();
+
+            // Set up event listeners
+            document.getElementById('deploy-new-btn').addEventListener('click', () => {
+                window.location.href = '/deployments';
+            });
+
+            // Auto-refresh every 30 seconds
+            setInterval(updateUI, 30000);
+        });
+
+        function showError(message) {
+            const errorEl = document.createElement('div');
+            errorEl.className = 'error-message';
+            errorEl.textContent = message;
+            document.body.appendChild(errorEl);
+            setTimeout(() => errorEl.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
